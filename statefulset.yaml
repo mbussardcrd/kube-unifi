@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: unifi-controller
+spec:
+  serviceName: unifi-controller
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: unifi-controller
+        image: jacobalberty/unifi
+        imagePullPolicy: Always
+        env:
+        - name: TZ
+          value: "US/Pacific"
+        - name: LOTSOFDEVICES
+          value: "true"
+        - name: JVM_INIT_HEAP_SIZE
+          value: "750M"
+        - name: JVM_MAX_HEAP_SIZE
+          value: "1024M"
+        - name: UNIFI_STDOUT
+          value: "true"
+        ports:
+        - name: device-comm
+          containerPort: 8080
+          protocol: TCP
+        - name: stun
+          containerPort: 3478
+          protocol: UDP
+        - name: default-console
+          containerPort: 8443
+          protocol: TCP
+        - name: secure-redirect
+          containerPort: 8843
+          protocol: TCP
+        - name: http-redirect
+          containerPort: 8880
+          protocol: TCP
+        - name: speedtest
+          containerPort: 6789
+          protocol: TCP
+        - name: unifi-disc
+          containerPort: 10001
+          protocol: UDP
+        - name: unifi-disc-l2
+          containerPort: 1900
+          protocol: UDP
+        resources:
+          requests:
+            cpu: "150m"
+            memory: "500Mi"
+          limits:
+            cpu: "400m"
+            memory: "2048Mi"
+        volumeMounts:
+          - name: unifi-data
+            mountPath: /unifi/data
+          - name: unifi-logs
+            mountPath: /unifi/log
+      volumes:
+        - name: unifi-data
+          persistentVolumeClaim:
+            claimName: temp-unifi-data-longhorn-pvc
+        - name: unifi-logs
+          persistentVolumeClaim:
+            claimName: temp-unifi-logs-longhorn-pvc

@@ -1,0 +1,63 @@
+---
+kind: Kustomization
+resources:
+  - longhorn-pvc.yaml
+  - statefulset.yaml
+  - service.yaml
+  - ingress-route.yaml
+images:
+  - name: jacobalberty/unifi
+    newTag: "latest"
+patches:
+# Set service IP for STUN
+  - patch: |-
+      - op: add
+        path: /spec/type
+        value: LoadBalancer
+      - op: add
+        path: /spec/loadBalancerIP
+        value: 192.168.235.x
+    target:
+      kind: Service
+# Set Traefik ingress DNS match name
+  - patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: Host(`x.unifi.leapshock.com`)
+    target:
+      kind: IngressRoute
+# Set PVS names in PVC claimName
+  # - patch: |-
+      # - op: replace
+        # path: /metadata/name
+        # value: crds-unifi-data-longhorn-pvc
+    # target:
+      # kind: persistentVolumeClaim
+      # name: temp-unifi-data-longhorn-pvc
+      # version: v1
+    # options:
+      # allowNameChange: true
+  # - patch: |-
+      # - op: replace
+        # path: /metadata/name
+        # value: crds-unifi-logs-longhorn-pvc
+    # target:
+      # kind: persistentVolumeClaim
+      # name: temp-unifi-logs-longhorn-pvc
+      # version: v1
+    # options:
+      # allowNameChange: true
+# Set PVC data names in statefulset 
+  - patch: |-
+     - op: replace
+       path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+       value: unifi-data-longhorn-pvc
+     - op: replace
+       path: /spec/template/spec/volumes/1/persistentVolumeClaim/claimName
+       value: unifi-logs-longhorn-pvc
+    target:
+      kind: StatefulSet
+commonLabels:
+  app: unifi-controller
+  app.kubernetes.io/instance: unifi-controller
+  app.kubernetes.io/name: unifi-controller
