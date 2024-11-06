@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`temp.unifi.leapshock.com`)
+    - match: Host(`x.unifi.x.com`)
       kind: Rule
       services:
       - name: unifi-controller

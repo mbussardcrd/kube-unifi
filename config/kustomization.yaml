@@ -23,7 +23,7 @@ patches:
   - patch: |-
       - op: replace
         path: /spec/routes/0/match
-        value: Host(`x.unifi.leapshock.com`)
+        value: Host(`x.unifi.x.com`)
     target:
       kind: IngressRoute
 # Set PVS names in PVC claimName
